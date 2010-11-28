@@ -1,0 +1,69 @@
+*maximize.txt*
+
+-----------------------------------------------------------------------------
+Maximize                                        *maxmimize*
+
+  Introduction                   |maximize-intro|
+  MaximizeWindow                 |maximize-window|
+  MinimizeWindow                 |minimize-window|
+  Configuration                  |maximize-config|
+-----------------------------------------------------------------------------
+
+-----------------------------------------------------------------------------
+Introduction
+
+When working with multiple windows in a single vim instance things can get
+cluttered and focusing on a subset of the windows can become difficult.  The
+maximize plugin attempts to help with this issue by providing commands which
+allow you to maximize a vim windows (by minimize others) or alternatively
+minimize one or more windows.
+
+-----------------------------------------------------------------------------
+MaximizeWindow                                  *maximize-window*
+                                                *:MaximizeWindow*
+                                                *:MaximizeWindowFull*
+
+The first command that maximize.vim provides is :MaximizeWindow which will
+toggle maximization of the current window.  When a window is maximized all
+other windows will be minimized. Also, when moving to another window, that
+window will be maximized and the previous window minimized.
+
+:MaximizeWindow will however not maximize any fixed windows (those with
+|'winfixwidth'| or |'winfixheight'| set) so that windows like quickfix,
+location list, NERDTree, etc. can remain visible. If you would like those
+windows to be minimized as well, an alternate command :MaximizeWindowFull is
+provided to do so.
+
+-----------------------------------------------------------------------------
+MinimizeWindow                                  *minimize-window*
+                                                *:MinimizeWindow*
+                                                *:MinimizeRestore*
+
+While |:MaximizeWindow| minimizes all but the current window, :MinimizeWindow
+will minimize the current window. Or if a space separated list of windows
+numbers is provided, then those windows will be minimized.
+
+To reset the current set of minimized windows to their original state, you can
+use the command :MinimizeRestore.
+
+
+-----------------------------------------------------------------------------
+Configuration                                   *maximize-config*
+
+- *g:MaximizeMinWinHeight* (Default: 0)
+  Height that vertically minimized windows will be set to.
+
+- *g:MaximizeMinWinWidth* (Default: 0)
+  Width that horizontally minimized windows will be set to.
+
+- *g:MaximizeStatusLineEnabled* (Default: 0)
+  When set to 1, enables the maximize status line which adds the buffer and
+  window number to the status line (just after line and column numbers),
+  allowing you to quickly determine a given window's number when using
+  |:MinimizeWindow|.
+
+- *g:MaximizeStatusLine* (Default: '%<%f\ %M\ %h%r%=%-10.(%l,%c%V\ b=%n,w=%{winnr()}%)\ %P')
+  The status line value that will be used when |g:MaximizeStatusLineEnabled|
+  is set.
+
+vim:tw=78:ft=help:norl:

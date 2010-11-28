@@ -1,25 +1,38 @@
 " Author:  Eric Van Dewoestine
 "
-" Description: {{{
-"   see http://eclim.org/vim/common/maximize.html
+" License: {{{
+"   Copyright (c) 2005 - 2010, Eric Van Dewoestine
+"   All rights reserved.
 "
-" License:
+"   Redistribution and use of this software in source and binary forms, with
+"   or without modification, are permitted provided that the following
+"   conditions are met:
 "
-" Copyright (C) 2005 - 2010  Eric Van Dewoestine
+"   * Redistributions of source code must retain the above
+"     copyright notice, this list of conditions and the
+"     following disclaimer.
 "
-" This program is free software: you can redistribute it and/or modify
-" it under the terms of the GNU General Public License as published by
-" the Free Software Foundation, either version 3 of the License, or
-" (at your option) any later version.
+"   * Redistributions in binary form must reproduce the above
+"     copyright notice, this list of conditions and the
+"     following disclaimer in the documentation and/or other
+"     materials provided with the distribution.
 "
-" This program is distributed in the hope that it will be useful,
-" but WITHOUT ANY WARRANTY; without even the implied warranty of
-" MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-" GNU General Public License for more details.
+"   * Neither the name of Eric Van Dewoestine nor the names of its
+"     contributors may be used to endorse or promote products derived from
+"     this software without specific prior written permission of
+"     Eric Van Dewoestine.
 "
-" You should have received a copy of the GNU General Public License
-" along with this program.  If not, see <http://www.gnu.org/licenses/>.
-"
+"   THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS
+"   IS" AND ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO,
+"   THE IMPLIED WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR
+"   PURPOSE ARE DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT OWNER OR
+"   CONTRIBUTORS BE LIABLE FOR ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL,
+"   EXEMPLARY, OR CONSEQUENTIAL DAMAGES (INCLUDING, BUT NOT LIMITED TO,
+"   PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES; LOSS OF USE, DATA, OR
+"   PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON ANY THEORY OF
+"   LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT (INCLUDING
+"   NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+"   SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 " }}}
 
 " Global Variables {{{
@@ -34,15 +47,15 @@
 " }}}
 
 " MaximizeWindow(full) {{{
-function! eclim#display#maximize#MaximizeWindow(full)
+function! maximize#MaximizeWindow(full)
   " disable any minimize settings
-  call eclim#display#maximize#ResetMinimized()
+  call maximize#ResetMinimized()
 
   " get the window that is maximized
   let maximized = s:GetMaximizedWindow()
   if maximized
     call s:DisableMaximizeAutoCommands()
-    call eclim#display#maximize#RestoreWindows(maximized)
+    call maximize#RestoreWindows(maximized)
   endif
 
   let maximized_mode = a:full ? 'full' : 'fixed'
@@ -56,14 +69,14 @@ function! eclim#display#maximize#MaximizeWindow(full)
     endwhile
     exec 'set winminwidth=' . g:MaximizeMinWinWidth
     exec 'set winminheight=' . g:MaximizeMinWinHeight
-    call eclim#display#maximize#MaximizeUpdate(a:full)
+    call maximize#MaximizeUpdate(a:full)
   else
     let g:MaximizedMode = ''
   endif
 endfunction " }}}
 
 " MinimizeWindow([winnr, ...]) {{{
-function! eclim#display#maximize#MinimizeWindow(...)
+function! maximize#MinimizeWindow(...)
   let curwinnum = winnr()
 
   exec 'set winminheight=' . g:MaximizeMinWinHeight
@@ -75,7 +88,7 @@ function! eclim#display#maximize#MinimizeWindow(...)
   " first turn off maximized if enabled
   let maximized = s:GetMaximizedWindow()
   if maximized
-    call eclim#display#maximize#RestoreWindows(maximized)
+    call maximize#RestoreWindows(maximized)
   endif
 
   let args = []
@@ -129,7 +142,7 @@ function! eclim#display#maximize#MinimizeWindow(...)
 endfunction " }}}
 
 " MaximizeUpdate(full) {{{
-function! eclim#display#maximize#MaximizeUpdate(full)
+function! maximize#MaximizeUpdate(full)
   call s:InitWindowDimensions(winnr())
   call s:DisableMaximizeAutoCommands()
 
@@ -152,7 +165,7 @@ function! eclim#display#maximize#MaximizeUpdate(full)
 endfunction " }}}
 
 " ResetMinimized() {{{
-function! eclim#display#maximize#ResetMinimized()
+function! maximize#ResetMinimized()
   call s:DisableMinimizeAutoCommands()
   let winend = winnr('$')
   let winnum = 1
@@ -172,7 +185,7 @@ function! eclim#display#maximize#ResetMinimized()
 endfunction " }}}
 
 " RestoreWindows(maximized) {{{
-function! eclim#display#maximize#RestoreWindows(maximized)
+function! maximize#RestoreWindows(maximized)
   " reset the maximized var.
   if a:maximized
     call setwinvar(a:maximized, 'maximized', 0)
@@ -186,7 +199,7 @@ endfunction " }}}
 
 " NavigateWindows(cmd) {{{
 " Used navigate windows by skipping minimized windows.
-function! eclim#display#maximize#NavigateWindows(wincmd)
+function! maximize#NavigateWindows(wincmd)
   " edge case for the command line window
   if &ft == 'vim' && bufname('%') == '[Command Line]'
     quit
@@ -234,7 +247,7 @@ function! s:EnableMaximizeAutoCommands(full)
   augroup maximize
     autocmd!
     exec 'autocmd BufWinEnter,WinEnter * nested ' .
-      \ 'call eclim#display#maximize#MaximizeUpdate(' . a:full . ')'
+      \ 'call maximize#MaximizeUpdate(' . a:full . ')'
     exec 'autocmd VimResized,BufDelete * nested ' .
       \ 'call s:MaximizeRefresh(' . a:full . ')'
     exec 'autocmd BufReadPost quickfix ' .
@@ -282,7 +295,7 @@ function! s:MaximizeRefresh(full)
     let curwin = winnr()
     try
       noautocmd exec maximized . 'winc w'
-      call eclim#display#maximize#MaximizeUpdate(a:full)
+      call maximize#MaximizeUpdate(a:full)
     finally
       exec curwin . 'winc w'
     endtry
@@ -294,8 +307,8 @@ function! s:CloseFixedWindow(full)
   if expand('<afile>') == '' || &buftype != ''
     let maximized = s:GetMaximizedWindow()
     if maximized
-      call eclim#util#DelayedCommand(
-        \ 'call eclim#display#maximize#MaximizeUpdate(' . a:full . ')')
+      call s:DelayedCommand(
+        \ 'call maximize#MaximizeUpdate(' . a:full . ')')
     endif
   endif
 endfunction " }}}
@@ -590,6 +603,31 @@ function! s:RestoreWinVar(winnr, var)
   if getwinvar(a:winnr, save) != ''
     call setwinvar(a:winnr, a:var, getwinvar(a:winnr, save))
   endif
+endfunction " }}}
+
+" s:DelayedCommand(command, [delay]) {{{
+" Executes a delayed command.  Useful in cases where one would expect an
+" autocommand event (WinEnter, etc) to fire, but doesn't, or you need a
+" command to execute after other autocommands have finished.
+" Note: Nesting is not supported.  A delayed command cannot be invoke off
+" another delayed command.
+function! s:DelayedCommand(command, ...)
+  let uid = fnamemodify(tempname(), ':t:r')
+  if &updatetime > 1
+    exec 'let g:delayed_updatetime_save' . uid . ' = &updatetime'
+  endif
+  exec 'let g:delayed_command' . uid . ' = a:command'
+  let &updatetime = len(a:000) ? a:000[0] : 1
+  exec 'augroup delayed_command' . uid
+    exec 'autocmd CursorHold * ' .
+      \ '  if exists("g:delayed_updatetime_save' . uid . '") | ' .
+      \ '    let &updatetime = g:delayed_updatetime_save' . uid . ' | ' .
+      \ '    unlet g:delayed_updatetime_save' . uid . ' | ' .
+      \ '  endif | ' .
+      \ '  exec g:delayed_command' . uid . ' | ' .
+      \ '  unlet g:delayed_command' . uid . ' | ' .
+      \ '  autocmd! delayed_command' . uid
+  exec 'augroup END'
 endfunction " }}}
 
 " vim:ft=vim:fdm=marker
