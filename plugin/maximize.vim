@@ -47,16 +47,6 @@ endif
 let s:save_cpo=&cpo
 set cpo&vim
 
-" Global Variables {{{
-if !exists('g:MaximizeStatusLine')
-  let g:MaximizeStatusLine = '%<%f\ %M\ %h%r%=%-10.(%l,%c%V\ b=%n,w=%{winnr()}%)\ %P'
-endif
-
-if exists('g:MaximizeStatusLineEnabled') && g:MaximizeStatusLineEnabled
-  exec "set statusline=" . g:MaximizeStatusLine
-endif
-" }}}
-
 " Command Declarations {{{
 if !exists(":MaximizeWindow")
   command MaximizeWindow :call maximize#MaximizeWindow(0)

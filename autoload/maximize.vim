@@ -1,7 +1,7 @@
 " Author:  Eric Van Dewoestine
 "
 " License: {{{
-"   Copyright (c) 2005 - 2010, Eric Van Dewoestine
+"   Copyright (c) 2005 - 2011, Eric Van Dewoestine
 "   All rights reserved.
 "
 "   Redistribution and use of this software in source and binary forms, with
@@ -389,7 +389,6 @@ function! s:Reminimize()
 
   " run all the resizing commands
   for cmd in commands
-    echom cmd
     exec cmd
   endfor
 

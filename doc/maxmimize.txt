@@ -56,14 +56,4 @@ Configuration                                   *maximize-config*
 - *g:MaximizeMinWinWidth* (Default: 0)
   Width that horizontally minimized windows will be set to.
 
-- *g:MaximizeStatusLineEnabled* (Default: 0)
-  When set to 1, enables the maximize status line which adds the buffer and
-  window number to the status line (just after line and column numbers),
-  allowing you to quickly determine a given window's number when using
-  |:MinimizeWindow|.
-
-- *g:MaximizeStatusLine* (Default: '%<%f\ %M\ %h%r%=%-10.(%l,%c%V\ b=%n,w=%{winnr()}%)\ %P')
-  The status line value that will be used when |g:MaximizeStatusLineEnabled|
-  is set.
-
 vim:tw=78:ft=help:norl:
