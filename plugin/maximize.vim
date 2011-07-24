@@ -6,7 +6,7 @@
 " }}}
 "
 " License: {{{
-"   Copyright (c) 2005 - 2010, Eric Van Dewoestine
+"   Copyright (c) 2005 - 2011, Eric Van Dewoestine
 "   All rights reserved.
 "
 "   Redistribution and use of this software in source and binary forms, with
@@ -54,9 +54,7 @@ if !exists(":MaximizeWindow")
 endif
 if !exists(":MinimizeWindow")
   command -nargs=* MinimizeWindow :call maximize#MinimizeWindow(<f-args>)
-  command MinimizeRestore
-      \ call maximize#ResetMinimized() |
-      \ call maximize#RestoreWindows(0)
+  command MinimizeRestore call maximize#ResetMinimized()
 endif
 " }}}
 

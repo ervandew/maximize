@@ -42,8 +42,6 @@
   if !exists('g:MaximizeMinWinWidth')
     let g:MaximizeMinWinWidth = 0
   endif
-
-  let g:MaximizedMode = ''
 " }}}
 
 " MaximizeWindow(full) {{{
@@ -52,15 +50,18 @@ function! maximize#MaximizeWindow(full)
   call maximize#ResetMinimized()
 
   " get the window that is maximized
-  let maximized = s:GetMaximizedWindow()
-  if maximized
-    call s:DisableMaximizeAutoCommands()
-    call maximize#RestoreWindows(maximized)
+  if s:IsTabMaximized()
+    " only disable if there are no longer any maximized windows on all tabs.
+    if !s:IsAnotherTabMaximized()
+      call s:DisableMaximizeAutoCommands()
+    else
+    endif
+    call maximize#RestoreWindows(s:GetMaximizedWindow())
   endif
 
   let maximized_mode = a:full ? 'full' : 'fixed'
-  if g:MaximizedMode != maximized_mode
-    let g:MaximizedMode = maximized_mode
+  if !exists('t:maximized_mode') || t:maximized_mode != maximized_mode
+    let t:maximized_mode = maximized_mode
     let last = winnr('$')
     let index = 1
     while index <= last
@@ -69,9 +70,9 @@ function! maximize#MaximizeWindow(full)
     endwhile
     exec 'set winminwidth=' . g:MaximizeMinWinWidth
     exec 'set winminheight=' . g:MaximizeMinWinHeight
-    call maximize#MaximizeUpdate(a:full)
+    call maximize#MaximizeUpdate(a:full, 1)
   else
-    let g:MaximizedMode = ''
+    let t:maximized_mode = ''
   endif
 endfunction " }}}
 
@@ -86,9 +87,8 @@ function! maximize#MinimizeWindow(...)
   call s:DisableMinimizeAutoCommands()
 
   " first turn off maximized if enabled
-  let maximized = s:GetMaximizedWindow()
-  if maximized
-    call maximize#RestoreWindows(maximized)
+  if s:IsTabMaximized()
+    call maximize#RestoreWindows(s:GetMaximizedWindow())
   endif
 
   let args = []
@@ -135,14 +135,19 @@ function! maximize#MinimizeWindow(...)
     endwhile
   endif
 
-  noautocmd call s:Reminimize()
-  if num_minimized > 0
+  noautocmd call s:Reminimize(1)
+  let t:minimized = num_minimized > 0 ? 1 : ''
+  if num_minimized > 0 || s:IsAnotherTabMinimized()
     call s:EnableMinimizeAutoCommands()
   endif
 endfunction " }}}
 
-" MaximizeUpdate(full) {{{
-function! maximize#MaximizeUpdate(full)
+" MaximizeUpdate(full, force) {{{
+function! maximize#MaximizeUpdate(full, force)
+  if !a:force && !s:IsTabMaximized()
+    return
+  endif
+
   call s:InitWindowDimensions(winnr())
   call s:DisableMaximizeAutoCommands()
 
@@ -166,7 +171,11 @@ endfunction " }}}
 
 " ResetMinimized() {{{
 function! maximize#ResetMinimized()
+  if !s:IsTabMinimized()
+    return
+  endif
   call s:DisableMinimizeAutoCommands()
+  let t:minimized = ''
   let winend = winnr('$')
   let winnum = 1
   let num_minimized = 0
@@ -179,8 +188,12 @@ function! maximize#ResetMinimized()
     endif
     let winnum = winnum + 1
   endwhile
-  if num_minimized > 0
-    call s:RestoreFixedWindows()
+
+  call s:RestoreFixedWindows()
+  winc =
+
+  if s:IsAnotherTabMinimized()
+    call s:EnableMinimizeAutoCommands()
   endif
 endfunction " }}}
 
@@ -247,7 +260,7 @@ function! s:EnableMaximizeAutoCommands(full)
   augroup maximize
     autocmd!
     exec 'autocmd BufWinEnter,WinEnter * nested ' .
-      \ 'call maximize#MaximizeUpdate(' . a:full . ')'
+      \ 'call maximize#MaximizeUpdate(' . a:full . ', 0)'
     exec 'autocmd VimResized,BufDelete * nested ' .
       \ 'call s:MaximizeRefresh(' . a:full . ')'
     exec 'autocmd BufReadPost quickfix ' .
@@ -268,16 +281,24 @@ function! s:EnableMinimizeAutoCommands()
   call s:DisableMaximizeAutoCommands()
   augroup minimize
     autocmd!
-    autocmd BufWinEnter,WinEnter * nested noautocmd call s:Reminimize()
+    autocmd BufWinEnter,WinEnter * nested noautocmd call s:Reminimize(0)
   augroup END
 endfunction " }}}
 
-" s:GetMaximizedWindow() {{{
-function! s:GetMaximizedWindow()
-  let winend = winnr('$')
+" s:GetMaximizedWindow([tabnr]) {{{
+function! s:GetMaximizedWindow(...)
+  if a:0
+    let winend = tabpagewinnr(a:1, '$')
+  else
+    let winend = winnr('$')
+  endif
   let winnum = 1
   while winnum <= winend
-    let max = getwinvar(winnum, 'maximized')
+    if a:0
+      let max = gettabwinvar(a:1, winnum, 'maximized')
+    else
+      let max = getwinvar(winnum, 'maximized')
+    endif
     if max
       return winnum
     endif
@@ -287,15 +308,67 @@ function! s:GetMaximizedWindow()
   return 0
 endfunction " }}}
 
+" s:IsTabMaximized([tabnr]) {{{
+function! s:IsTabMaximized(...)
+  if a:0
+    return gettabvar(a:1, 'maximized_mode') != ''
+  endif
+  return exists('t:maximized_mode') && t:maximized_mode != ''
+endfunction " }}}
+
+" s:IsAnotherTabMaximized() {{{
+function! s:IsAnotherTabMaximized()
+  let tabend = tabpagenr('$')
+  let index = 0
+  while index < tabend
+    let index += 1
+    if index == tabpagenr()
+      continue
+    endif
+    if s:IsTabMaximized(index)
+      return 1
+    endif
+  endwhile
+  return 0
+endfunction " }}}
+
+" s:IsTabMinimized([tabnr]) {{{
+function! s:IsTabMinimized(...)
+  if a:0
+    return gettabvar(a:1, 'minimized') != ''
+  endif
+  return exists('t:minimized') && t:minimized != ''
+endfunction " }}}
+
+" s:IsAnotherTabMinimized() {{{
+function! s:IsAnotherTabMinimized()
+  let tabend = tabpagenr('$')
+  let index = 0
+  while index < tabend
+    let index += 1
+    if index == tabpagenr()
+      continue
+    endif
+    if s:IsTabMinimized(index)
+      return 1
+    endif
+  endwhile
+  return 0
+endfunction " }}}
+
 " s:MaximizeRefresh(full) {{{
 function! s:MaximizeRefresh(full)
+  if !s:IsTabMaximized()
+    return
+  endif
+
   call s:InitWindowDimensions(winnr())
   let maximized = s:GetMaximizedWindow()
   if maximized
     let curwin = winnr()
     try
       noautocmd exec maximized . 'winc w'
-      call maximize#MaximizeUpdate(a:full)
+      call maximize#MaximizeUpdate(a:full, 0)
     finally
       exec curwin . 'winc w'
     endtry
@@ -308,7 +381,7 @@ function! s:CloseFixedWindow(full)
     let maximized = s:GetMaximizedWindow()
     if maximized
       call s:DelayedCommand(
-        \ 'call maximize#MaximizeUpdate(' . a:full . ')')
+        \ 'call maximize#MaximizeUpdate(' . a:full . ', 0)')
     endif
   endif
 endfunction " }}}
@@ -331,10 +404,14 @@ function! s:RestoreFixedWindows()
   endwhile
 endfunction " }}}
 
-" s:Reminimize() {{{
+" s:Reminimize(force) {{{
 " Invoked when changing windows to ensure that any minimized windows are
 " returned to their minimized state.
-function! s:Reminimize()
+function! s:Reminimize(force)
+  if !a:force && !s:IsTabMinimized()
+    return
+  endif
+
   call s:InitWindowDimensions(winnr())
   let curwinnum = winnr()
   let winend = winnr('$')
