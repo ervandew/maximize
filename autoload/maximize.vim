@@ -258,6 +258,14 @@ function! s:EnableMaximizeAutoCommands(full) " {{{
     exec 'autocmd BufReadPost quickfix ' .
       \ 'call s:MaximizeRefresh(' . a:full . ')'
     exec 'autocmd BufUnload * call s:CloseFixedWindow(' . a:full . ')'
+    " for :pclose
+    exec 'autocmd BufWinLeave * nested call s:DelayedCommand(' .
+        \ '"call maximize#MaximizeUpdate(' . a:full . ', 0)")'
+  augroup END
+
+  augroup supertab_preview_closed
+    exec 'autocmd User <supertab> ' .
+      \ 'call maximize#MaximizeUpdate(' . a:full . ', 0)'
   augroup END
 endfunction " }}}
 
