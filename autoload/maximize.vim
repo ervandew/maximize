@@ -1,7 +1,7 @@
 " Author:  Eric Van Dewoestine
 "
 " License: {{{
-"   Copyright (c) 2005 - 2011, Eric Van Dewoestine
+"   Copyright (c) 2005 - 2012, Eric Van Dewoestine
 "   All rights reserved.
 "
 "   Redistribution and use of this software in source and binary forms, with
@@ -44,8 +44,7 @@
   endif
 " }}}
 
-" MaximizeWindow(full) {{{
-function! maximize#MaximizeWindow(full)
+function! maximize#MaximizeWindow(full) " {{{
   " disable any minimize settings
   call maximize#ResetMinimized()
 
@@ -76,8 +75,7 @@ function! maximize#MaximizeWindow(full)
   endif
 endfunction " }}}
 
-" MinimizeWindow([winnr, ...]) {{{
-function! maximize#MinimizeWindow(...)
+function! maximize#MinimizeWindow(...) " {{{
   let curwinnum = winnr()
 
   exec 'set winminheight=' . g:MaximizeMinWinHeight
@@ -142,8 +140,7 @@ function! maximize#MinimizeWindow(...)
   endif
 endfunction " }}}
 
-" MaximizeUpdate(full, force) {{{
-function! maximize#MaximizeUpdate(full, force)
+function! maximize#MaximizeUpdate(full, force) " {{{
   if !a:force && !s:IsTabMaximized()
     return
   endif
@@ -169,8 +166,7 @@ function! maximize#MaximizeUpdate(full, force)
   call s:EnableMaximizeAutoCommands(a:full)
 endfunction " }}}
 
-" ResetMinimized() {{{
-function! maximize#ResetMinimized()
+function! maximize#ResetMinimized() " {{{
   if !s:IsTabMinimized()
     return
   endif
@@ -197,8 +193,7 @@ function! maximize#ResetMinimized()
   endif
 endfunction " }}}
 
-" RestoreWindows(maximized) {{{
-function! maximize#RestoreWindows(maximized)
+function! maximize#RestoreWindows(maximized) " {{{
   " reset the maximized var.
   if a:maximized
     call setwinvar(a:maximized, 'maximized', 0)
@@ -210,9 +205,9 @@ function! maximize#RestoreWindows(maximized)
   call s:RestoreFixedWindows()
 endfunction " }}}
 
-" NavigateWindows(cmd) {{{
-" Used navigate windows by skipping minimized windows.
-function! maximize#NavigateWindows(wincmd)
+function! maximize#NavigateWindows(wincmd) " {{{
+  " Used navigate windows by skipping minimized windows.
+
   " edge case for the command line window
   if &ft == 'vim' && bufname('%') == '[Command Line]'
     quit
@@ -234,8 +229,7 @@ function! maximize#NavigateWindows(wincmd)
   endif
 endfunction " }}}
 
-" s:InitWindowDimensions(winnr) {{{
-function! s:InitWindowDimensions(winnr)
+function! s:InitWindowDimensions(winnr) " {{{
   if getwinvar(a:winnr, 'winheight') == ''
     "echom 'win: ' . a:winnr . ' height: ' . winheight(a:winnr)
     call setwinvar(a:winnr, 'winheight', winheight(a:winnr))
@@ -246,15 +240,13 @@ function! s:InitWindowDimensions(winnr)
   endif
 endfunction " }}}
 
-" s:DisableMaximizeAutoCommands() {{{
-function! s:DisableMaximizeAutoCommands()
+function! s:DisableMaximizeAutoCommands() " {{{
   augroup maximize
     autocmd!
   augroup END
 endfunction " }}}
 
-" s:EnableMaximizeAutoCommands(full) {{{
-function! s:EnableMaximizeAutoCommands(full)
+function! s:EnableMaximizeAutoCommands(full) " {{{
   call s:DisableMaximizeAutoCommands()
   call s:DisableMinimizeAutoCommands()
   augroup maximize
@@ -269,15 +261,13 @@ function! s:EnableMaximizeAutoCommands(full)
   augroup END
 endfunction " }}}
 
-" s:DisableMinimizeAutoCommands() {{{
-function! s:DisableMinimizeAutoCommands()
+function! s:DisableMinimizeAutoCommands() " {{{
   augroup minimize
     autocmd!
   augroup END
 endfunction " }}}
 
-" s:EnableMinimizeAutoCommands() {{{
-function! s:EnableMinimizeAutoCommands()
+function! s:EnableMinimizeAutoCommands() " {{{
   call s:DisableMaximizeAutoCommands()
   augroup minimize
     autocmd!
@@ -285,8 +275,7 @@ function! s:EnableMinimizeAutoCommands()
   augroup END
 endfunction " }}}
 
-" s:GetMaximizedWindow([tabnr]) {{{
-function! s:GetMaximizedWindow(...)
+function! s:GetMaximizedWindow(...) " {{{
   if a:0
     let winend = tabpagewinnr(a:1, '$')
   else
@@ -308,16 +297,14 @@ function! s:GetMaximizedWindow(...)
   return 0
 endfunction " }}}
 
-" s:IsTabMaximized([tabnr]) {{{
-function! s:IsTabMaximized(...)
+function! s:IsTabMaximized(...) " {{{
   if a:0
     return gettabvar(a:1, 'maximized_mode') != ''
   endif
   return exists('t:maximized_mode') && t:maximized_mode != ''
 endfunction " }}}
 
-" s:IsAnotherTabMaximized() {{{
-function! s:IsAnotherTabMaximized()
+function! s:IsAnotherTabMaximized() " {{{
   let tabend = tabpagenr('$')
   let index = 0
   while index < tabend
@@ -332,16 +319,14 @@ function! s:IsAnotherTabMaximized()
   return 0
 endfunction " }}}
 
-" s:IsTabMinimized([tabnr]) {{{
-function! s:IsTabMinimized(...)
+function! s:IsTabMinimized(...) " {{{
   if a:0
     return gettabvar(a:1, 'minimized') != ''
   endif
   return exists('t:minimized') && t:minimized != ''
 endfunction " }}}
 
-" s:IsAnotherTabMinimized() {{{
-function! s:IsAnotherTabMinimized()
+function! s:IsAnotherTabMinimized() " {{{
   let tabend = tabpagenr('$')
   let index = 0
   while index < tabend
@@ -356,8 +341,7 @@ function! s:IsAnotherTabMinimized()
   return 0
 endfunction " }}}
 
-" s:MaximizeRefresh(full) {{{
-function! s:MaximizeRefresh(full)
+function! s:MaximizeRefresh(full) " {{{
   if !s:IsTabMaximized()
     return
   endif
@@ -375,8 +359,7 @@ function! s:MaximizeRefresh(full)
   endif
 endfunction " }}}
 
-" s:CloseFixedWindow(full) {{{
-function! s:CloseFixedWindow(full)
+function! s:CloseFixedWindow(full) " {{{
   if expand('<afile>') == '' || &buftype != ''
     let maximized = s:GetMaximizedWindow()
     if maximized
@@ -386,8 +369,7 @@ function! s:CloseFixedWindow(full)
   endif
 endfunction " }}}
 
-" s:RestoreFixedWindows() {{{
-function! s:RestoreFixedWindows()
+function! s:RestoreFixedWindows() " {{{
   let last = winnr('$')
   let index = last
   while index >= 1
@@ -404,10 +386,10 @@ function! s:RestoreFixedWindows()
   endwhile
 endfunction " }}}
 
-" s:Reminimize(force) {{{
-" Invoked when changing windows to ensure that any minimized windows are
-" returned to their minimized state.
-function! s:Reminimize(force)
+function! s:Reminimize(force) " {{{
+  " Invoked when changing windows to ensure that any minimized windows are
+  " returned to their minimized state.
+
   if !a:force && !s:IsTabMinimized()
     return
   endif
@@ -473,9 +455,9 @@ function! s:Reminimize(force)
   call s:RestoreFixedWindows()
 endfunction " }}}
 
-" s:IsInRow(window) {{{
-" Determines if the supplied window is in a row of equally sized windows.
-function! s:IsInRow(window)
+function! s:IsInRow(window) " {{{
+  " Determines if the supplied window is in a row of equally sized windows.
+
   let origwinnr = winnr()
   exec a:window . 'winc w'
 
@@ -509,9 +491,9 @@ function! s:IsInRow(window)
   return 0
 endfunction " }}}
 
-" s:IsInColumn(window) {{{
-" Determines is the supplied window is in a column of equally sized windows.
-function! s:IsInColumn(window)
+function! s:IsInColumn(window) " {{{
+  " Determines is the supplied window is in a column of equally sized windows.
+
   let origwinnr = winnr()
   exec a:window . 'winc w'
 
@@ -545,9 +527,9 @@ function! s:IsInColumn(window)
   return 0
 endfunction " }}}
 
-" s:RowMinimized(window) {{{
-" Determines if all windows on a row are minimized.
-function! s:RowMinimized(window)
+function! s:RowMinimized(window) " {{{
+  " Determines if all windows on a row are minimized.
+
   let origwinnr = winnr()
   exec a:window . 'winc w'
 
@@ -605,9 +587,9 @@ function! s:RowMinimized(window)
   return len(windows) > 0
 endfunction " }}}
 
-" s:ColumnMinimized(window) {{{
-" Determines all windows in column are minimized.
-function! s:ColumnMinimized(window)
+function! s:ColumnMinimized(window) " {{{
+  " Determines all windows in column are minimized.
+
   let origwinnr = winnr()
   exec a:window . 'winc w'
 
@@ -665,29 +647,27 @@ function! s:ColumnMinimized(window)
   return len(windows) > 0
 endfunction " }}}
 
-" s:SaveWinVar(winnr, var) {{{
-function! s:SaveWinVar(winnr, var)
+function! s:SaveWinVar(winnr, var) " {{{
   let save = substitute(a:var, '^&', '', '') . '_save'
   if getwinvar(a:winnr, save) == ''
     call setwinvar(a:winnr, save, getwinvar(a:winnr, a:var))
   endif
 endfunction " }}}
 
-" s:RestoreWinVar(winnr, var) {{{
-function! s:RestoreWinVar(winnr, var)
+function! s:RestoreWinVar(winnr, var) " {{{
   let save = substitute(a:var, '^&', '', '') . '_save'
   if getwinvar(a:winnr, save) != ''
     call setwinvar(a:winnr, a:var, getwinvar(a:winnr, save))
   endif
 endfunction " }}}
 
-" s:DelayedCommand(command, [delay]) {{{
-" Executes a delayed command.  Useful in cases where one would expect an
-" autocommand event (WinEnter, etc) to fire, but doesn't, or you need a
-" command to execute after other autocommands have finished.
-" Note: Nesting is not supported.  A delayed command cannot be invoke off
-" another delayed command.
-function! s:DelayedCommand(command, ...)
+function! s:DelayedCommand(command, ...) " {{{
+  " Executes a delayed command.  Useful in cases where one would expect an
+  " autocommand event (WinEnter, etc) to fire, but doesn't, or you need a
+  " command to execute after other autocommands have finished.
+  " Note: Nesting is not supported.  A delayed command cannot be invoke off
+  " another delayed command.
+
   let uid = fnamemodify(tempname(), ':t:r')
   if &updatetime > 1
     exec 'let g:delayed_updatetime_save' . uid . ' = &updatetime'
