@@ -1,7 +1,7 @@
 " Author:  Eric Van Dewoestine
 "
 " License: {{{
-"   Copyright (c) 2005 - 2012, Eric Van Dewoestine
+"   Copyright (c) 2005 - 2017, Eric Van Dewoestine
 "   All rights reserved.
 "
 "   Redistribution and use of this software in source and binary forms, with
@@ -361,8 +361,12 @@ function! s:MaximizeRefresh(full) " {{{
     try
       noautocmd exec maximized . 'winc w'
       call maximize#MaximizeUpdate(a:full, 0)
+    catch /E788/
+      " ignore, happens when opening a quickfix window
     finally
-      exec curwin . 'winc w'
+      if winnr() != curwin
+        exec curwin . 'winc w'
+      endif
     endtry
   endif
 endfunction " }}}
