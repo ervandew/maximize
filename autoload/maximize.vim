@@ -1,7 +1,7 @@
 " Author:  Eric Van Dewoestine
 "
 " License: {{{
-"   Copyright (c) 2005 - 2017, Eric Van Dewoestine
+"   Copyright (c) 2005 - 2021, Eric Van Dewoestine
 "   All rights reserved.
 "
 "   Redistribution and use of this software in source and binary forms, with
@@ -264,7 +264,7 @@ function! s:EnableMaximizeAutoCommands(full) " {{{
   augroup END
 
   augroup supertab_preview_closed
-    exec 'autocmd User <supertab> ' .
+    exec 'autocmd! User <supertab> ' .
       \ 'call maximize#MaximizeUpdate(' . a:full . ', 0)'
   augroup END
 endfunction " }}}
