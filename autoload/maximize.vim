@@ -1,7 +1,7 @@
 " Author:  Eric Van Dewoestine
 "
 " License: {{{
-"   Copyright (c) 2005 - 2021, Eric Van Dewoestine
+"   Copyright (c) 2005 - 2024, Eric Van Dewoestine
 "   All rights reserved.
 "
 "   Redistribution and use of this software in source and binary forms, with
@@ -45,6 +45,10 @@
 " }}}
 
 function! maximize#MaximizeWindow(full) " {{{
+  if s:IsFloating()
+    return
+  endif
+
   " disable any minimize settings
   call maximize#ResetMinimized()
 
@@ -76,6 +80,10 @@ function! maximize#MaximizeWindow(full) " {{{
 endfunction " }}}
 
 function! maximize#MinimizeWindow(...) " {{{
+  if s:IsFloating()
+    return
+  endif
+
   let curwinnum = winnr()
 
   exec 'set winminheight=' . g:MaximizeMinWinHeight
@@ -148,9 +156,11 @@ function! maximize#MaximizeUpdate(full, force) " {{{
   call s:InitWindowDimensions(winnr())
   call s:DisableMaximizeAutoCommands()
 
-  let w:maximized = 1
-  winc |
-  winc _
+  if !s:IsFloating()
+    let w:maximized = 1
+    winc |
+    winc _
+  endif
 
   if !a:full
     call s:RestoreFixedWindows()
@@ -303,6 +313,14 @@ function! s:GetMaximizedWindow(...) " {{{
   endwhile
 
   return 0
+endfunction " }}}
+
+function! s:IsFloating() " {{{
+  let floating = v:false
+  if has('nvim')
+    let floating = luaeval('vim.api.nvim_win_get_config(0).zindex ~= nil')
+  endif
+  return floating
 endfunction " }}}
 
 function! s:IsTabMaximized(...) " {{{
